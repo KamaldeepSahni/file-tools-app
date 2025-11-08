@@ -59,21 +59,20 @@ const BASE_OUTPUT_DIR = path.join(__dirname, '../outputs');
 
 if (process.env.FFMPEG_PATH) setFfmpegPathIfProvided(process.env.FFMPEG_PATH);
 
-// 🧩 Attach workspace middleware
-app.use(withTempWorkspace(BASE_UPLOAD_DIR, BASE_OUTPUT_DIR));
-
 // Health
 app.get('/api/health', (_, res) => {
   logger.info('Health check OK');
   res.json({ ok: true });
 });
 
+// 🧩 Attach workspace middleware
+app.use('/api', withTempWorkspace(BASE_UPLOAD_DIR, BASE_OUTPUT_DIR));
+
 // 🧠 Helper to create multer dynamically per request
 function createUpload(req: any) {
   const storage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, req.locals.uploadDir),
-    filename: (_req, file, cb) =>
-      cb(null, `${Date.now()}-${file.originalname}`),
+    filename: (_req, file, cb) => cb(null, file.originalname),
   });
   return multer({ storage });
 }
