@@ -117,7 +117,10 @@ app.post('/api/image-to-pdf', ((
             2
           )} MB), splitting...`
         );
-        const chunks = await splitPdfBuffer(Buffer.from(pdfBuf), maxChunkMB);
+        const chunks = await splitPdfBuffer(
+          Buffer.from(pdfBuf),
+          maxChunkMB * 1024 * 1024
+        );
         const results = chunks.map((b, i) => {
           const name = `${baseName}_part${i + 1}.pdf`;
           writeOut(req.locals.outputDir, name, Buffer.from(b));

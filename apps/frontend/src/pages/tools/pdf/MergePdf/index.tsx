@@ -182,7 +182,7 @@ export default function MergePdf() {
     try {
       const form = new FormData();
       files.forEach(f => form.append('pdfs', f));
-      if (outputName.trim()) form.append('customName', outputName.trim());
+      if (outputName.trim()) form.append('filename', outputName.trim());
 
       const { data } = await axios.post(
         'http://localhost:4000/api/pdf/merge',
