@@ -4,3 +4,4 @@ dist/
 logs/
 uploads/
 outputs/
+.DS_store

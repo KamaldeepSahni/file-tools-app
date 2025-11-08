@@ -11,6 +11,7 @@ import {
   mergePdfBuffers,
   removePdfPassword,
   reorderPdfPages,
+  compressPdfToTargetBuffer,
 } from './lib/pdfUtils';
 import {
   setFfmpegPathIfProvided,
@@ -176,10 +177,15 @@ app.post('/api/compress/media', ((
       }`;
       const outPath = path.join(req.locals.outputDir, outName);
 
+      const maxSizeMB = parseFloat(req.body?.maxSizeMB || '7');
+      const duration = await probeDuration(file.path);
+      const targetBitrateKbps = Math.floor((maxSizeMB * 8192) / duration);
+      const targetBitrate = `${targetBitrateKbps}k`;
+
       if (['.mp4', '.mov', '.mkv', '.webm', '.avi'].includes(ext)) {
-        await compressVideoFile(file.path, outPath);
+        await compressVideoFile(file.path, outPath, { bitrate: targetBitrate });
       } else if (['.mp3', '.wav', '.m4a', '.aac', '.ogg'].includes(ext)) {
-        await compressAudioFile(file.path, outPath);
+        await compressAudioFile(file.path, outPath, { bitrate: targetBitrate });
       } else {
         logger.warn(`Unsupported media type: ${ext}`);
         return res.status(400).json({ error: 'Unsupported media type' });
@@ -197,6 +203,50 @@ app.post('/api/compress/media', ((
       });
     } catch (e: any) {
       logger.error(`Media compression failed: ${e.message}`);
+      res.status(500).json({ error: e.message });
+    }
+  });
+}) as RequestHandler);
+
+// ===== PDF Compression Route =====
+app.post('/api/compress/pdf', ((
+  req: RequestWithWorkspace,
+  res: Response,
+  _: NextFunction
+) => {
+  const upload = createUpload(req).single('pdf');
+  upload(req, res, async (err: any) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    try {
+      const file = req.file as Express.Multer.File;
+      if (!file) return res.status(400).json({ error: 'No PDF uploaded' });
+
+      const { requestId, outputDir } = req.locals;
+      const maxSizeMB = parseFloat(req.body?.maxSizeMB || '7');
+      const targetBytes = maxSizeMB * 1024 * 1024;
+
+      const base = sanitizeFilename(path.parse(file.originalname).name);
+      const outName = `${base}_compressed.pdf`;
+      const outPath = path.join(outputDir, outName);
+
+      const inputBuf = fs.readFileSync(file.path);
+      const finalBuf = await compressPdfToTargetBuffer(inputBuf, targetBytes);
+
+      fs.writeFileSync(outPath, Buffer.from(finalBuf));
+      markCreated(outPath);
+
+      const stat = fs.statSync(outPath);
+
+      return res.json({
+        file: {
+          name: outName,
+          url: `/outputs/${requestId}/${outName}`,
+          size: stat.size,
+        },
+      });
+    } catch (e: any) {
+      logger.error(`PDF compression failed: ${e.message}`);
       res.status(500).json({ error: e.message });
     }
   });
@@ -753,3 +803,4 @@ app.use(express.static(frontendDist));
 app.get('*', (_, res) => {
   res.sendFile(path.join(frontendDist, 'index.html'));
 });
+

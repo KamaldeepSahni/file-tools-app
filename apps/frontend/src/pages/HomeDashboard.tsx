@@ -28,6 +28,8 @@ import {
   LockOpen,
   JoinFull,
   DashboardCustomize,
+  AudioFile,
+  PermMedia,
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 
@@ -62,6 +64,12 @@ const tools = [
         icon: <LockOpen />,
         desc: 'Remove PDF password protection',
       },
+      {
+        name: 'Compress PDF',
+        path: '/tools/pdf/compress',
+        icon: <PictureAsPdf />,
+        desc: 'Compress PDF to target size',
+      },
     ],
   },
   {
@@ -70,16 +78,22 @@ const tools = [
     icon: <Movie />,
     items: [
       {
-        name: 'Split Video',
-        path: '/tools/video/split',
-        icon: <VideoFile />,
-        desc: 'Split videos into smaller chunks',
-      },
-      {
         name: 'Trim Video',
         path: '/tools/video/trim',
         icon: <ContentCut />,
         desc: 'Cut a portion of the video',
+      },
+      {
+        name: 'Split Video',
+        path: '/tools/video/split',
+        icon: <PermMedia />,
+        desc: 'Split videos into smaller chunks',
+      },
+      {
+        name: 'Compress Video',
+        path: '/tools/video/compress',
+        icon: <VideoFile />,
+        desc: 'Compress video to target size',
       },
     ],
   },
@@ -88,7 +102,12 @@ const tools = [
     color: 'linear-gradient(90deg, #43a047, #a5d6a7)',
     icon: <GraphicEq />,
     items: [
-      // compress audio will be inserted later
+      {
+        name: 'Compress Audio',
+        path: '/tools/audio/compress',
+        icon: <AudioFile />,
+        desc: 'Compress audio to target size',
+      },
     ],
   },
   {
@@ -310,3 +329,4 @@ export default function HomeDashboard() {
     </Box>
   );
 }
+

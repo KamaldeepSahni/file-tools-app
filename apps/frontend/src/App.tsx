@@ -25,8 +25,11 @@ import SplitVideo from './pages/tools/video/SplitVideo';
 import ZipConvert from './pages/tools/other/ZipConvert';
 import UnlockPdf from './pages/tools/pdf/UnlockPdf';
 import MergePdf from './pages/tools/pdf/MergePdf';
+import CompressPdf from './pages/tools/pdf/CompressPdf';
 import ReorganizePdf from './pages/tools/pdf/ReorganizePdf';
 import TrimVideo from './pages/tools/video/TrimVideo';
+import CompressVideo from './pages/tools/video/CompressVideo';
+import CompressAudio from './pages/tools/audio/CompressAudio';
 
 export default function App() {
   const { mode, toggleTheme } = useThemeMode();
@@ -56,14 +59,14 @@ export default function App() {
       { name: 'Merge PDFs', path: '/tools/pdf/merge' },
       { name: 'Reorganize Pages', path: '/tools/pdf/reorganize' },
       { name: 'Unlock PDF', path: '/tools/pdf/unlock' },
+      { name: 'Compress PDF', path: '/tools/pdf/compress' },
     ],
     video: [
-      { name: 'Split Video', path: '/tools/video/split' },
       { name: 'Trim Video', path: '/tools/video/trim' },
+      { name: 'Split Video', path: '/tools/video/split' },
+      { name: 'Compress Video', path: '/tools/video/compress' },
     ],
-    audio: [
-      // Compress Audio will go here later
-    ],
+    audio: [{ name: 'Compress Audio', path: '/tools/audio/compress' }],
     other: [
       { name: 'Images → PDF', path: '/tools/other/images-to-pdf' },
       { name: 'PDF → Images', path: '/tools/other/pdf-to-images' },
@@ -162,11 +165,17 @@ export default function App() {
                 <Route path="unlock" element={<UnlockPdf />} />
                 <Route path="merge" element={<MergePdf />} />
                 <Route path="reorganize" element={<ReorganizePdf />} />
+                <Route path="compress" element={<CompressPdf />} />
               </Route>
               {/* Video Tools */}
               <Route path="video">
-                <Route path="split" element={<SplitVideo />} />
                 <Route path="trim" element={<TrimVideo />} />
+                <Route path="split" element={<SplitVideo />} />
+                <Route path="compress" element={<CompressVideo />} />
+              </Route>
+              {/* Video Tools */}
+              <Route path="audio">
+                <Route path="compress" element={<CompressAudio />} />
               </Route>
               {/* Other Tools */}
               <Route path="other">
@@ -181,3 +190,4 @@ export default function App() {
     </>
   );
 }
+

@@ -112,6 +112,56 @@ export async function recompressPdfBuffer(
   return out.save();
 }
 
+export async function compressPdfToTargetBuffer(
+  pdfBuffer: Buffer,
+  targetBytes: number
+): Promise<Uint8Array> {
+  // Binary search jpeg quality 20-90
+  let low = 20;
+  let high = 90;
+  let best: Uint8Array = pdfBuffer;
+  const maxIterations = 7;
+
+  // load original
+  const src = await PDFDocument.load(pdfBuffer);
+
+  // extract page buffers as images (image-only compression)
+  const pages = src.getPageCount();
+  const originalImages: Buffer[] = [];
+  for (let i = 0; i < pages; i++) {
+    // Build a single-page PDF buffer for page i
+    const single = await PDFDocument.create();
+    const [copied] = await single.copyPages(src, [i]);
+    single.addPage(copied);
+    const singleBuf = await single.save();
+
+    // Rasterize that single-page PDF to a JPEG using sharp.
+    // The `density` option controls render DPI; 150 is a good balance of clarity/size.
+    const jpg = await sharp(singleBuf, { density: 150 })
+      .jpeg({ quality: 90 })
+      .toBuffer();
+
+    originalImages.push(jpg);
+  }
+
+  for (let i = 0; i < maxIterations; i++) {
+    const mid = Math.floor((low + high) / 2);
+    const recompressed = await recompressPdfBuffer(
+      pdfBuffer,
+      { jpegQuality: mid },
+      originalImages
+    );
+    if (recompressed.length <= targetBytes) {
+      best = recompressed;
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return best;
+}
+
 export async function mergePdfBuffers(buffers: Buffer[]): Promise<Uint8Array> {
   if (!buffers || buffers.length === 0) {
     throw new Error('No PDF buffers provided.');
@@ -165,3 +215,4 @@ export async function reorderPdfPages(
 
   return await out.save();
 }
+

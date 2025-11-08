@@ -11,21 +11,33 @@ export function setFfmpegPathIfProvided(ffmpegPath?: string): void {
 export function compressVideoFile(
   inputPath: string,
   outputPath: string,
-  options: { crf?: number; preset?: string } = {}
+  options: { crf?: number; preset?: string; bitrate?: string } = {}
 ): Promise<string> {
   const crf = options.crf ?? 28;
   const preset = options.preset ?? 'medium';
 
   logger.info(`Compressing video (CRF=${crf}, preset=${preset})`);
+  if (options.bitrate) {
+    logger.info(`Compressing video using target bitrate ${options.bitrate}`);
+  }
 
   return new Promise((resolve, reject) => {
-    ffmpeg(inputPath)
-      .outputOptions([
+    const cmd = ffmpeg(inputPath);
+    if (options.bitrate) {
+      cmd.outputOptions([
+        '-vcodec libx264',
+        `-b:v ${options.bitrate}`,
+        '-movflags +faststart',
+      ]);
+    } else {
+      cmd.outputOptions([
         '-vcodec libx264',
         `-crf ${crf}`,
         `-preset ${preset}`,
         '-movflags +faststart',
-      ])
+      ]);
+    }
+    cmd
       .on('error', err => {
         logger.error(`Video compression failed: ${err.message}`);
         reject(err);
@@ -76,3 +88,4 @@ export function compressAudioFile(
     });
   });
 }
+

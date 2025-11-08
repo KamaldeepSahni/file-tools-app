@@ -13,7 +13,7 @@ import {
   FormControlLabel,
   Slider,
 } from '@mui/material';
-import { VideoFile, ScatterPlot } from '@mui/icons-material';
+import { PermMedia, ScatterPlot } from '@mui/icons-material';
 import axios from 'axios';
 
 import { useUI } from '../../../../context/UIContext';
@@ -91,7 +91,7 @@ export default function SplitVideo() {
   return (
     <Box>
       <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-        <VideoFile fontSize="small" />
+        <PermMedia fontSize="small" />
         <Typography variant="h5" fontWeight={700}>
           Split Video
         </Typography>
@@ -227,3 +227,4 @@ export default function SplitVideo() {
     </Box>
   );
 }
+
