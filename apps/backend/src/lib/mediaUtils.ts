@@ -42,6 +42,9 @@ export function compressVideoFile(
         logger.error(`Video compression failed: ${err.message}`);
         reject(err);
       })
+      .on('progress', progress => {
+        logger.info(`Video compression progress: ${progress.percent}%`);
+      })
       .on('end', () => {
         logger.info(`Video compression complete: ${outputPath}`);
         resolve(outputPath);
@@ -88,4 +91,3 @@ export function compressAudioFile(
     });
   });
 }
-

@@ -803,4 +803,3 @@ app.use(express.static(frontendDist));
 app.get('*', (_, res) => {
   res.sendFile(path.join(frontendDist, 'index.html'));
 });
-
